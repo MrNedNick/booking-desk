@@ -1,0 +1,151 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 10;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 var(--app-radius-sm) 0;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+
+  &:focus {
+    left: 0;
+  }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 68px;
+  padding-block: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: inherit;
+  text-decoration: none;
+  margin-inline-end: auto;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font: var(--mat-sys-title-small);
+  letter-spacing: 0.02em;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+
+  strong {
+    font: var(--mat-sys-title-medium);
+  }
+}
+
+.nav {
+  display: flex;
+  gap: 0.25rem;
+
+  a {
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    color: var(--mat-sys-on-surface-variant);
+    text-decoration: none;
+    font: var(--mat-sys-label-large);
+
+    &:hover {
+      background: var(--mat-sys-surface-container);
+      color: var(--mat-sys-on-surface);
+    }
+
+    &.active {
+      background: var(--mat-sys-secondary-container);
+      color: var(--mat-sys-on-secondary-container);
+    }
+  }
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.role {
+  --mat-button-toggle-height: 36px;
+}
+
+.site-main {
+  flex: 1;
+  // Holds the height of a page before it renders, so the footer never jumps.
+  min-height: 78dvh;
+  padding-block: 1.75rem 3rem;
+}
+
+.site-footer {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 1.25rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  font: var(--mat-sys-body-small);
+}
+
+@media (max-width: 760px) {
+  .header-inner {
+    row-gap: 0.6rem;
+  }
+
+  .brand-text .app-muted {
+    display: none;
+  }
+
+  .nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+}

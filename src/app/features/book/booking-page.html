@@ -1,0 +1,113 @@
+<section class="head">
+  <a routerLink="/schedule" class="back">
+    <app-icon name="chevron-left" [size]="18" />
+    Back to the schedule
+  </a>
+  <h1>Book a room</h1>
+  <p class="lede">
+    The form checks the room's day while you fill it in, so a clash shows up here — with the name of
+    whoever booked it — instead of after you press the button.
+  </p>
+</section>
+
+@if (dayError(); as message) {
+  <div class="app-card panel">
+    <app-error-state
+      title="Could not check that day"
+      [message]="message"
+      (retry)="retryDay()"
+    />
+  </div>
+} @else {
+  <form class="app-card panel" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Room</mat-label>
+        <mat-select formControlName="roomId">
+          @for (room of rooms(); track room.id) {
+            <mat-option [value]="room.id">{{ room.name }} · seats {{ room.capacity }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.roomId.hasError('required')) {
+          <mat-error>Pick a room.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date" [min]="minDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="picker" />
+        <mat-datepicker #picker />
+        @if (form.controls.date.hasError('required')) {
+          <mat-error>Pick a date.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>From</mat-label>
+        <mat-select formControlName="start">
+          @for (slot of slots; track slot) {
+            <mat-option [value]="slot">{{ label(slot) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>To</mat-label>
+        <mat-select formControlName="end">
+          @for (slot of endSlots; track slot) {
+            <mat-option [value]="slot">{{ label(slot) }}</mat-option>
+          }
+        </mat-select>
+        @if (length(); as duration) {
+          <mat-hint>{{ duration }}</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>People</mat-label>
+        <input matInput type="number" inputmode="numeric" min="1" max="50" formControlName="attendees" />
+        @if (selectedRoom(); as room) {
+          <mat-hint>{{ room.name }} seats {{ room.capacity }}</mat-hint>
+        }
+        @if (form.controls.attendees.hasError('min')) {
+          <mat-error>At least one person has to be in the room.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>What is it for</mat-label>
+        <input matInput formControlName="purpose" maxlength="80" placeholder="Sprint planning" />
+        @if (form.controls.purpose.hasError('required') && form.controls.purpose.touched) {
+          <mat-error>Say what the meeting is for — everyone else sees this on the schedule.</mat-error>
+        }
+        @if (form.controls.purpose.hasError('minlength')) {
+          <mat-error>A few more characters, so the entry means something.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Cross-field problems: they belong to the booking as a whole, not to one input. -->
+    @if (problems().length) {
+      <ul class="problems" role="alert">
+        @for (problem of problems(); track problem.text) {
+          <li>
+            <app-icon [name]="problem.icon" [size]="18" />
+            <span>{{ problem.text }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (serverError(); as message) {
+      <p class="server-error" role="alert">{{ message }}</p>
+    }
+
+    <div class="actions">
+      <a matButton routerLink="/schedule">Cancel</a>
+      <button matButton="filled" type="submit" [disabled]="submitting() || loadingDay()">
+        {{ submitting() ? 'Booking…' : 'Book the room' }}
+      </button>
+    </div>
+  </form>
+}

@@ -1,0 +1,69 @@
+<section class="head">
+  <div>
+    <h1>All bookings</h1>
+    <p class="lede">
+      The next four weeks across every room. An admin can cancel anyone's booking; the server checks
+      that role on each request, not just this page.
+    </p>
+  </div>
+  <a matButton routerLink="/schedule">Back to the schedule</a>
+</section>
+
+@if (error(); as message) {
+  <div class="app-card panel">
+    <app-error-state title="Could not load the bookings" [message]="message" (retry)="retry()" />
+  </div>
+} @else if (loading() && !groups().length) {
+  <div class="app-card panel">
+    <app-skeleton [count]="4" [height]="72" label="Loading every booking" />
+  </div>
+} @else {
+  <dl class="stats">
+    <div class="app-card stat">
+      <dt>Bookings</dt>
+      <dd>{{ stats().total }}</dd>
+    </div>
+    <div class="app-card stat">
+      <dt>Hours booked</dt>
+      <dd>{{ stats().hours }}</dd>
+    </div>
+    <div class="app-card stat">
+      <dt>Busiest room</dt>
+      <dd>{{ stats().busiest }}</dd>
+    </div>
+    <div class="app-card stat">
+      <dt>People booking</dt>
+      <dd>{{ stats().people }}</dd>
+    </div>
+  </dl>
+
+  @if (groups().length) {
+    @for (group of groups(); track group.date) {
+      <section class="app-card panel day">
+        <h2>{{ group.label }}</h2>
+        <ul class="list">
+          @for (booking of group.bookings; track booking.id) {
+            <li>
+              <app-booking-card
+                [booking]="booking"
+                [roomName]="roomName(booking)"
+                [canCancel]="true"
+                [showOwner]="true"
+                [busy]="cancelling() === booking.id"
+                (cancelBooking)="confirmCancel($event)"
+              />
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  } @else {
+    <div class="app-card panel">
+      <app-empty-state
+        title="Nothing booked in the next four weeks"
+        hint="Every room is free. Bookings made by anyone will appear here."
+        icon="calendar"
+      />
+    </div>
+  }
+}

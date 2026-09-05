@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+
+  h1 {
+    font: var(--mat-sys-headline-medium);
+  }
+
+  app-icon {
+    margin-inline-end: 0.35rem;
+  }
+}
+
+.lede {
+  margin: 0.4rem 0 0;
+  max-width: 60ch;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-large);
+}
+
+.panel {
+  padding: 1rem;
+}
+
+.filter {
+  margin-bottom: 1rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

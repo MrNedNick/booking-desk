@@ -1,0 +1,67 @@
+<section class="head">
+  <div>
+    <h1>My bookings</h1>
+    <p class="lede">Everything you have booked. Cancelling frees the slot for everyone immediately.</p>
+  </div>
+  <a matButton="filled" routerLink="/book">
+    <app-icon name="plus" [size]="18" />
+    New booking
+  </a>
+</section>
+
+@if (error(); as message) {
+  <div class="app-card panel">
+    <app-error-state title="Could not load your bookings" [message]="message" (retry)="retry()" />
+  </div>
+} @else if (loading() && !hasAny()) {
+  <div class="app-card panel">
+    <app-skeleton [count]="3" [height]="72" label="Loading your bookings" />
+  </div>
+} @else if (!hasAny()) {
+  <div class="app-card panel">
+    <app-empty-state
+      title="No bookings yet"
+      hint="Open the schedule, click any free slot in the week grid, and it will show up here."
+    >
+      <a matButton="filled" routerLink="/schedule">Find a free slot</a>
+    </app-empty-state>
+  </div>
+} @else {
+  <div class="app-card panel">
+    <mat-button-toggle-group
+      class="filter"
+      aria-label="Which bookings to show"
+      [value]="filter()"
+      (change)="setFilter($event.value)"
+      hideSingleSelectionIndicator
+    >
+      <mat-button-toggle value="upcoming">Upcoming ({{ upcoming().length }})</mat-button-toggle>
+      <mat-button-toggle value="past">Past ({{ past().length }})</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (visible().length) {
+      <ul class="list">
+        @for (booking of visible(); track booking.id) {
+          <li>
+            <app-booking-card
+              [booking]="booking"
+              [roomName]="roomName(booking)"
+              [canCancel]="true"
+              [busy]="cancelling() === booking.id"
+              (cancelBooking)="confirmCancel($event)"
+            />
+          </li>
+        }
+      </ul>
+    } @else {
+      <app-empty-state
+        [title]="filter() === 'upcoming' ? 'Nothing coming up' : 'Nothing in the past yet'"
+        [hint]="
+          filter() === 'upcoming'
+            ? 'Your past bookings are still here — switch the filter above.'
+            : 'Bookings move here once they are over.'
+        "
+      />
+    }
+  </div>
+}

@@ -1,0 +1,207 @@
+<section class="intro">
+  <div>
+    <h1>This week in the rooms</h1>
+    <p class="lede">
+      Pick a room, find a gap, book it. Conflicts are caught before you submit, and everyone can see
+      what is already taken.
+    </p>
+  </div>
+  <button matButton="filled" type="button" class="primary-cta" (click)="bookNew()">
+    <app-icon name="plus" [size]="18" />
+    New booking
+  </button>
+</section>
+
+@if (error(); as message) {
+  <div class="app-card panel">
+    <app-error-state title="Could not load the schedule" [message]="message" (retry)="retry()" />
+  </div>
+} @else {
+  <div class="app-card panel">
+    <div class="toolbar">
+      <div class="rooms" role="group" aria-label="Rooms">
+        @if (rooms().length) {
+          <mat-chip-listbox
+            aria-label="Room"
+            [value]="selectedRoom()?.id"
+            hideSingleSelectionIndicator
+          >
+            @for (room of rooms(); track room.id) {
+              <mat-chip-option
+                [value]="room.id"
+                [selected]="room.id === selectedRoom()?.id"
+                (selectionChange)="$event.selected && selectRoom(room)"
+              >
+                {{ room.name }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        } @else {
+          <app-skeleton [count]="1" [height]="34" label="Loading rooms" />
+        }
+      </div>
+
+      <div class="week-nav">
+        <button
+          matIconButton
+          type="button"
+          (click)="previousWeek()"
+          aria-label="Previous week"
+          title="Previous week"
+        >
+          <app-icon name="chevron-left" />
+        </button>
+        <span class="week-label">{{ weekLabel() }}</span>
+        <button
+          matIconButton
+          type="button"
+          (click)="nextWeek()"
+          aria-label="Next week"
+          title="Next week"
+        >
+          <app-icon name="chevron-right" />
+        </button>
+        @if (!isCurrentWeek()) {
+          <button matButton type="button" (click)="goToToday()">{{ homeWeekLabel() }}</button>
+        }
+      </div>
+    </div>
+
+    <!-- Always rendered, so the room details cannot push the grid down on arrival. -->
+    <p class="room-meta">
+      @if (selectedRoom(); as room) {
+        <span><app-icon name="users" [size]="16" /> Seats {{ room.capacity }}</span>
+        <span>Floor {{ room.floor }}</span>
+        @for (feature of room.features; track feature) {
+          <span class="feature">
+            <app-icon
+              [name]="feature === 'video' ? 'video' : feature === 'whiteboard' ? 'pen' : 'monitor'"
+              [size]="16"
+            />
+            {{ feature }}
+          </span>
+        }
+      }
+    </p>
+
+    @if (loading() && !rooms().length) {
+      <!-- Same height as the grid it becomes: loading must not move the page. -->
+      <app-skeleton [count]="1" [height]="totalHeight" label="Loading the schedule" />
+    } @else if (isNarrow()) {
+      <ol class="day-list">
+        @for (column of columns(); track column.date) {
+          <li class="day-card" [class.today]="column.isToday" [class.past-day]="column.isPastDay">
+            <h2>
+              {{ column.weekday }} {{ column.dayLabel }}
+              @if (column.isToday) {
+                <span class="today-badge">today</span>
+              }
+            </h2>
+
+            @if (column.placed.length) {
+              <ul class="day-bookings">
+                @for (item of column.placed; track item.booking.id) {
+                  <li>
+                    <button
+                      type="button"
+                      class="booking-row"
+                      [class.mine]="item.mine"
+                      (click)="openBooking(item.booking)"
+                    >
+                      <span class="time">{{ item.time }}</span>
+                      <span class="body">
+                        <strong>{{ item.booking.purpose }}</strong>
+                        <span class="app-muted">{{ item.booking.ownerName }}</span>
+                      </span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="app-muted free-day">Free all day.</p>
+            }
+
+            <button matButton type="button" (click)="book(column.date, 9 * 60)">
+              <app-icon name="plus" [size]="16" />
+              Book this day
+            </button>
+          </li>
+        }
+      </ol>
+    } @else {
+      <div class="grid-scroll">
+        <div class="grid" [style.--slot-h.px]="slotHeight">
+          <div class="corner" aria-hidden="true"></div>
+          @for (column of columns(); track column.date) {
+            <div class="day-head" [class.today]="column.isToday">
+              <span class="weekday">{{ column.weekday }}</span>
+              <span class="date">{{ column.dayLabel }}</span>
+            </div>
+          }
+
+          <div class="hours" [style.height.px]="totalHeight" aria-hidden="true">
+            @for (label of timeLabels; track label) {
+              <span class="hour" [style.top.px]="slotTop($index)">{{ label }}</span>
+            }
+          </div>
+
+          @for (column of columns(); track column.date) {
+            <div
+              class="day-column"
+              [style.height.px]="totalHeight"
+              [class.today]="column.isToday"
+              [class.past-day]="column.isPastDay"
+            >
+              @for (slot of column.freeSlots; track slot.start) {
+                <button
+                  #slotButton
+                  type="button"
+                  class="free-slot"
+                  [class.past]="slot.past"
+                  [disabled]="slot.past"
+                  [style.top.px]="offsetOf(slot.start)"
+                  [attr.data-slot]="column.date + '|' + slot.start"
+                  [attr.aria-label]="slot.label"
+                  [tabIndex]="isActiveSlot(column.date, slot.start) ? 0 : -1"
+                  (keydown)="onSlotKeydown($event, column.date, slot.start)"
+                  (click)="book(column.date, slot.start)"
+                ></button>
+              }
+
+              @for (item of column.placed; track item.booking.id) {
+                <button
+                  type="button"
+                  class="booking"
+                  [class.mine]="item.mine"
+                  [class.busy]="cancelling() === item.booking.id"
+                  [style.top.px]="item.top"
+                  [style.height.px]="item.height"
+                  [attr.aria-label]="item.label"
+                  (click)="openBooking(item.booking)"
+                >
+                  <span class="booking-title">{{ item.booking.purpose }}</span>
+                  <span class="booking-owner">{{ item.mine ? 'You' : item.booking.ownerName }}</span>
+                </button>
+              }
+
+              @if (column.isToday && nowOffset() !== null) {
+                <span class="now" [style.top.px]="nowOffset()" [attr.aria-label]="'Now ' + nowLabel()">
+                  <span class="now-dot"></span>
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <p class="legend">
+    <span class="key mine"></span> your bookings
+    <span class="key other"></span> someone else's
+    <span class="key free"></span> free — click to book
+    @if (!isNarrow()) {
+      <span class="legend-hint">Arrow keys move between free slots.</span>
+    }
+  </p>
+}

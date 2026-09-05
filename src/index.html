@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Booking Desk — meeting rooms</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Book a meeting room: a week at a glance, conflicts caught before you submit, admins see every booking."
+    />
+    <link rel="icon" href="favicon.ico" />
+    <script>
+      // Applies the saved theme before the first paint. Without it the page
+      // renders in the system scheme and then flips once the app boots.
+      (function () {
+        try {
+          var saved = localStorage.getItem('booking-desk.theme.v1');
+          var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme =
+            saved === 'light' || saved === 'dark' ? saved : dark ? 'dark' : 'light';
+        } catch (error) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

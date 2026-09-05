@@ -1,0 +1,131 @@
+@use '@angular/material' as mat;
+
+// One theme definition drives both colour schemes: Material 20 emits its system
+// variables through `light-dark()`, so switching `color-scheme` on <html> is the
+// entire dark mode implementation.
+html {
+  color-scheme: light dark;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$cyan-palette,
+      ),
+      typography: (
+        plain-family: (
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif,
+        ),
+        brand-family: (
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif,
+        ),
+      ),
+      density: 0,
+    )
+  );
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root {
+  --app-page-width: 1120px;
+  --app-gap: 1rem;
+  --app-radius: 14px;
+  --app-radius-sm: 9px;
+  --app-slot-height: 44px;
+  --app-time-column: 62px;
+  --app-shadow: 0 1px 2px light-dark(rgb(0 0 0 / 8%), rgb(0 0 0 / 40%));
+  --app-shadow-raised: 0 6px 20px light-dark(rgb(0 0 0 / 10%), rgb(0 0 0 / 45%));
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+  text-wrap: balance;
+}
+
+a {
+  color: var(--mat-sys-primary);
+}
+
+// Keyboard users must always be able to see where they are.
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.app-page {
+  width: min(100% - 2rem, var(--app-page-width));
+  margin-inline: auto;
+}
+
+.app-card {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+}
+
+.app-section-title {
+  font: var(--mat-sys-title-medium);
+  margin-bottom: 0.25rem;
+}
+
+.app-muted {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.app-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
