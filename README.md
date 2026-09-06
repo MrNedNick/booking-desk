@@ -1,5 +1,7 @@
 # Booking Desk
 
+**[Open Booking Desk](https://mrnednick.github.io/booking-desk/)**
+
 Meeting-room booking for a small office: a week of one room at a glance, a form
 that catches conflicts while you type, and two roles that mean something —
 employees manage their own bookings, admins manage everyone's.
@@ -126,8 +128,13 @@ updates with the app.
 npx vercel deploy --prod
 ```
 
-There is no public link yet — the repository is private. Everything above runs
-locally from the production build; Lighthouse on it (desktop preset) reports
+The [public demo](https://mrnednick.github.io/booking-desk/) runs on GitHub Pages.
+Pushes to `main` run lint, tests and a build with `--base-href /booking-desk/`,
+then deploy static entry points for the application routes. The same build
+without that option targets a domain root. Data and demo identities remain in
+the browser; this is not a shared office service.
+
+Lighthouse on the local production build (desktop preset) reports
 **100 performance / 100 accessibility / 100 best practices**.
 
 ## Known limits

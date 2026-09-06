@@ -11,6 +11,6 @@ export async function startMockApi(): Promise<void> {
   await worker.start({
     quiet: true,
     onUnhandledRequest: 'bypass',
-    serviceWorker: { url: `${document.baseURI}mockServiceWorker.js` },
+    serviceWorker: { url: new URL('mockServiceWorker.js', document.baseURI).toString() },
   });
 }
