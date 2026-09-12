@@ -4,7 +4,9 @@ import {
   Component,
   ElementRef,
   computed,
+  effect,
   inject,
+  input,
   signal,
   viewChildren,
 } from '@angular/core';
@@ -84,6 +86,9 @@ export class SchedulePage {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly breakpoints = inject(BreakpointObserver);
+
+  /** `?room=` on `/schedule` — the URL, not the store, is the source of truth on load. */
+  readonly room = input<string>();
 
   protected readonly rooms = this.store.rooms;
   protected readonly selectedRoom = this.store.selectedRoom;
@@ -269,6 +274,13 @@ export class SchedulePage {
 
   protected selectRoom(room: Room): void {
     this.store.selectRoom(room.id);
+    // Replace, not push — picking a room is a filter, not a page you'd want
+    // stacked in back-button history, but the link it leaves is shareable.
+    void this.router.navigate([], {
+      queryParams: { room: room.id },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   protected previousWeek(): void {
@@ -328,6 +340,18 @@ export class SchedulePage {
   }
 
   protected readonly userName = computed(() => this.session.user().name);
+
+  constructor() {
+    // Bootstraps the room shown on load from ?room=, once the room list is in
+    // — the store's own default (first room) wins for an empty or unknown id.
+    effect(() => {
+      const requested = this.room();
+      const rooms = this.rooms();
+      if (requested && rooms.some((candidate) => candidate.id === requested)) {
+        this.store.selectRoom(requested);
+      }
+    });
+  }
 }
 
 function messageOf(error: unknown): string {
