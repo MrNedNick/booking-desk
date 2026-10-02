@@ -21,7 +21,8 @@ import { setApiLatency } from './mocks/handlers';
 import { MockApiBackend } from './mocks/test-backend';
 import { callApi } from './mocks/test-client';
 
-const DAY = addDays(startOfWeek(nextWorkingDay()), 3);
+// Thursday of next week: always in the future, whatever day the suite runs on.
+const DAY = addDays(startOfWeek(nextWorkingDay()), 7 + 3);
 
 /** Everything the real app provides, minus the network. */
 function providers(): (Provider | EnvironmentProviders)[] {
